@@ -1,4 +1,4 @@
-module github.com/upbound/upjet-provider-template
+module github.com/Hitham07/provider-hcloudy
 
 go 1.21
 

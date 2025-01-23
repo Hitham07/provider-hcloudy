@@ -15,7 +15,7 @@ import (
 
 	"github.com/crossplane/upjet/pkg/terraform"
 
-	"github.com/upbound/upjet-provider-template/apis/v1beta1"
+	"github.com/Hitham07/provider-hcloudy/apis/v1beta1"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 	errGetProviderConfig    = "cannot get referenced ProviderConfig"
 	errTrackUsage           = "cannot track ProviderConfig usage"
 	errExtractCredentials   = "cannot extract credentials"
-	errUnmarshalCredentials = "cannot unmarshal template credentials as JSON"
+	errUnmarshalCredentials = "cannot unmarshal hcloudy credentials as JSON"
 )
 
 // TerraformSetupBuilder builds Terraform a terraform.SetupFn function which
@@ -67,6 +67,21 @@ func TerraformSetupBuilder(version, providerSource, providerVersion string) terr
 			"username": creds["username"],
 			"password": creds["password"],
 		}*/
+
+		// ##############################################################################
+		const (
+			keyToken        = "token"
+			keyEndpoint     = "endpoint"
+			keyPollInterval = "poll_interval"
+		)
+
+		// set provider configuration
+		ps.Configuration = map[string]interface{}{
+			"token":         creds[keyToken],
+			"endpoint":      creds[keyEndpoint],
+			"poll_interval": creds[keyPollInterval],
+		}
+
 		return ps, nil
 	}
 }
