@@ -9,6 +9,7 @@ import (
 
 	"github.com/crossplane/upjet/pkg/controller"
 
+	network "github.com/Hitham07/provider-hcloudy/internal/controller/hcloud/network"
 	providerconfig "github.com/Hitham07/provider-hcloudy/internal/controller/providerconfig"
 )
 
@@ -16,6 +17,7 @@ import (
 // the supplied manager.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
+		network.Setup,
 		providerconfig.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
