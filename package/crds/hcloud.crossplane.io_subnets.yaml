@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: networks.hcloud.crossplane.io
+  name: subnets.hcloud.crossplane.io
 spec:
   group: hcloud.crossplane.io
   names:
@@ -12,10 +12,10 @@ spec:
     - crossplane
     - managed
     - hcloudy
-    kind: Network
-    listKind: NetworkList
-    plural: networks
-    singular: network
+    kind: Subnet
+    listKind: SubnetList
+    plural: subnets
+    singular: subnet
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -34,8 +34,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Network is the Schema for the Networks API. Provides a Hetzner
-          Cloud Network to represent a Network in the Hetzner Cloud.
+        description: Subnet is the Schema for the Subnets API. Provides a Hetzner
+          Cloud Network Subnet to represent a Subnet in the Hetzner Cloud.
         properties:
           apiVersion:
             description: |-
@@ -55,7 +55,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: NetworkSpec defines the desired state of Network
+            description: SubnetSpec defines the desired state of Subnet
             properties:
               deletionPolicy:
                 default: Delete
@@ -73,31 +73,97 @@ spec:
                 type: string
               forProvider:
                 properties:
-                  deleteProtection:
-                    description: Enable or disable delete protection. See "Delete
-                      Protection" in the Provider Docs for details.
-                    type: boolean
-                  exposeRoutesToVswitch:
-                    description: |-
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                    type: boolean
                   ipRange:
-                    description: IP Range of the whole Network which must span all
-                      included subnets and route destinations. Must be one of the
-                      private ipv4 ranges of RFC1918.
+                    description: Range to allocate IPs from. Must be a subnet of the
+                      ip_range of the Network and must not overlap with any other
+                      subnets or with any destinations in routes.
                     type: string
-                  labels:
-                    additionalProperties:
-                      type: string
-                    description: User-defined labels (key-value pairs) should be created
-                      with.
+                  networkId:
+                    description: ID of the Network the subnet should be added to.
+                    type: number
+                  networkIdRef:
+                    description: Reference to a Network in hcloud to populate networkId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
                     type: object
-                    x-kubernetes-map-type: granular
-                  name:
-                    description: Name of the Network to create (must be unique per
-                      project).
+                  networkIdSelector:
+                    description: Selector for a Network in hcloud to populate networkId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  networkZone:
+                    description: Name of network zone.
                     type: string
+                  type:
+                    description: Type of subnet. server, cloud or vswitch
+                    type: string
+                  vswitchId:
+                    description: ID of the vswitch, Required if type is vswitch
+                    type: number
                 type: object
               initProvider:
                 description: |-
@@ -112,31 +178,97 @@ spec:
                   for example because of an external controller is managing them, like an
                   autoscaler.
                 properties:
-                  deleteProtection:
-                    description: Enable or disable delete protection. See "Delete
-                      Protection" in the Provider Docs for details.
-                    type: boolean
-                  exposeRoutesToVswitch:
-                    description: |-
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                    type: boolean
                   ipRange:
-                    description: IP Range of the whole Network which must span all
-                      included subnets and route destinations. Must be one of the
-                      private ipv4 ranges of RFC1918.
+                    description: Range to allocate IPs from. Must be a subnet of the
+                      ip_range of the Network and must not overlap with any other
+                      subnets or with any destinations in routes.
                     type: string
-                  labels:
-                    additionalProperties:
-                      type: string
-                    description: User-defined labels (key-value pairs) should be created
-                      with.
+                  networkId:
+                    description: ID of the Network the subnet should be added to.
+                    type: number
+                  networkIdRef:
+                    description: Reference to a Network in hcloud to populate networkId.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
                     type: object
-                    x-kubernetes-map-type: granular
-                  name:
-                    description: Name of the Network to create (must be unique per
-                      project).
+                  networkIdSelector:
+                    description: Selector for a Network in hcloud to populate networkId.
+                    properties:
+                      matchControllerRef:
+                        description: |-
+                          MatchControllerRef ensures an object with the same controller reference
+                          as the selecting object is selected.
+                        type: boolean
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        description: MatchLabels ensures an object with matching labels
+                          is selected.
+                        type: object
+                      policy:
+                        description: Policies for selection.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: |-
+                              Resolution specifies whether resolution of this reference is required.
+                              The default is 'Required', which means the reconcile will fail if the
+                              reference cannot be resolved. 'Optional' means this reference will be
+                              a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: |-
+                              Resolve specifies when this reference should be resolved. The default
+                              is 'IfNotPresent', which will attempt to resolve the reference only when
+                              the corresponding field is not present. Use 'Always' to resolve the
+                              reference on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    type: object
+                  networkZone:
+                    description: Name of network zone.
                     type: string
+                  type:
+                    description: Type of subnet. server, cloud or vswitch
+                    type: string
+                  vswitchId:
+                    description: ID of the vswitch, Required if type is vswitch
+                    type: number
                 type: object
               managementPolicies:
                 default:
@@ -310,43 +442,41 @@ spec:
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
                 || ''Update'' in self.managementPolicies) || has(self.forProvider.ipRange)
                 || (has(self.initProvider) && has(self.initProvider.ipRange))'
-            - message: spec.forProvider.name is a required parameter
+            - message: spec.forProvider.networkZone is a required parameter
               rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
-                || ''Update'' in self.managementPolicies) || has(self.forProvider.name)
-                || (has(self.initProvider) && has(self.initProvider.name))'
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.networkZone)
+                || (has(self.initProvider) && has(self.initProvider.networkZone))'
+            - message: spec.forProvider.type is a required parameter
+              rule: '!(''*'' in self.managementPolicies || ''Create'' in self.managementPolicies
+                || ''Update'' in self.managementPolicies) || has(self.forProvider.type)
+                || (has(self.initProvider) && has(self.initProvider.type))'
           status:
-            description: NetworkStatus defines the observed state of Network.
+            description: SubnetStatus defines the observed state of Subnet.
             properties:
               atProvider:
                 properties:
-                  deleteProtection:
-                    description: Enable or disable delete protection. See "Delete
-                      Protection" in the Provider Docs for details.
-                    type: boolean
-                  exposeRoutesToVswitch:
-                    description: |-
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                      Enable or disable exposing the routes to the vSwitch connection. The exposing only takes effect if a vSwitch connection is active.
-                    type: boolean
+                  gateway:
+                    type: string
                   id:
-                    description: (int) Unique ID of the network.
+                    description: (string) ID of the Network subnet.
                     type: string
                   ipRange:
-                    description: IP Range of the whole Network which must span all
-                      included subnets and route destinations. Must be one of the
-                      private ipv4 ranges of RFC1918.
+                    description: Range to allocate IPs from. Must be a subnet of the
+                      ip_range of the Network and must not overlap with any other
+                      subnets or with any destinations in routes.
                     type: string
-                  labels:
-                    additionalProperties:
-                      type: string
-                    description: User-defined labels (key-value pairs) should be created
-                      with.
-                    type: object
-                    x-kubernetes-map-type: granular
-                  name:
-                    description: Name of the Network to create (must be unique per
-                      project).
+                  networkId:
+                    description: ID of the Network the subnet should be added to.
+                    type: number
+                  networkZone:
+                    description: Name of network zone.
                     type: string
+                  type:
+                    description: Type of subnet. server, cloud or vswitch
+                    type: string
+                  vswitchId:
+                    description: ID of the vswitch, Required if type is vswitch
+                    type: number
                 type: object
               conditions:
                 description: Conditions of the resource.

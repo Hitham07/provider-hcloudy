@@ -28,6 +28,9 @@ type NetworkInitParameters struct {
 	// User-defined labels (key-value pairs) should be created with.
 	// +mapType=granular
 	Labels map[string]*string `json:"labels,omitempty" tf:"labels,omitempty"`
+
+	// Name of the Network to create (must be unique per project).
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type NetworkObservation struct {
@@ -48,6 +51,9 @@ type NetworkObservation struct {
 	// User-defined labels (key-value pairs) should be created with.
 	// +mapType=granular
 	Labels map[string]*string `json:"labels,omitempty" tf:"labels,omitempty"`
+
+	// Name of the Network to create (must be unique per project).
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 type NetworkParameters struct {
@@ -69,6 +75,10 @@ type NetworkParameters struct {
 	// +kubebuilder:validation:Optional
 	// +mapType=granular
 	Labels map[string]*string `json:"labels,omitempty" tf:"labels,omitempty"`
+
+	// Name of the Network to create (must be unique per project).
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 }
 
 // NetworkSpec defines the desired state of Network
@@ -108,6 +118,7 @@ type Network struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.ipRange) || (has(self.initProvider) && has(self.initProvider.ipRange))",message="spec.forProvider.ipRange is a required parameter"
+	// +kubebuilder:validation:XValidation:rule="!('*' in self.managementPolicies || 'Create' in self.managementPolicies || 'Update' in self.managementPolicies) || has(self.forProvider.name) || (has(self.initProvider) && has(self.initProvider.name))",message="spec.forProvider.name is a required parameter"
 	Spec   NetworkSpec   `json:"spec"`
 	Status NetworkStatus `json:"status,omitempty"`
 }

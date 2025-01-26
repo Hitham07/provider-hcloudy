@@ -9,3 +9,4 @@ metadata:
 spec:
   forProvider:
     ipRange: 10.0.1.0/24
+    name: my-net
